@@ -1,0 +1,494 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>BankApi – Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f5f7fb
+        }
+
+        .container-narrow {
+            max-width: 1050px
+        }
+
+        .card {
+            border-radius: 16px
+        }
+
+        .step-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700
+        }
+
+        .muted {
+            color: #6c757d
+        }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace
+        }
+
+        .table-sm td, .table-sm th {
+            padding: .45rem .6rem
+        }
+
+        .chip {
+            display: inline-block;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+            border-radius: 999px;
+            padding: .1rem .5rem;
+            margin: .1rem;
+            font-size: .85rem;
+            cursor: pointer
+        }
+
+            .chip:hover {
+                background: #e0e7ff
+            }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container container-narrow">
+            <span class="navbar-brand">🏦 BankApi</span>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-light btn-sm" href="./">Inicio</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container container-narrow py-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body d-flex flex-wrap gap-4 align-items-center">
+                <div>
+                    <span id="step1" class="step-badge bg-primary text-white">1</span>
+                    <span class="ms-2 fw-semibold">Crear cliente</span>
+                </div>
+                <div>
+                    <span id="step2" class="step-badge bg-secondary text-white">2</span>
+                    <span class="ms-2 fw-semibold">Crear cuenta</span>
+                </div>
+                <div>
+                    <span id="step3" class="step-badge bg-secondary text-white">3</span>
+                    <span class="ms-2 fw-semibold">Operaciones</span>
+                </div>
+                <div class="ms-auto muted small">
+                    Cliente ID: <span id="customerIdView" class="fw-semibold">—</span> ·
+                    Cuenta: <span id="accountNumberView" class="fw-semibold mono">—</span> ·
+                    Saldo: <span id="balanceView" class="fw-semibold">—</span>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-customer" data-bs-toggle="tab" data-bs-target="#pane-customer" type="button" role="tab">1) Cliente</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-account" data-bs-toggle="tab" data-bs-target="#pane-account" type="button" role="tab">2) Cuenta</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-ops" data-bs-toggle="tab" data-bs-target="#pane-ops" type="button" role="tab">3) Operaciones</button>
+            </li>
+        </ul>
+
+        <div class="tab-content pt-3">
+            <div class="tab-pane fade show active" id="pane-customer" role="tabpanel">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Crear cliente</h5>
+                        <form id="formCustomer" class="row g-3 needs-validation" novalidate>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre</label>
+                                <input name="name" class="form-control" placeholder="Ana Pérez" required>
+                                <div class="invalid-feedback">Ingresa un nombre.</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Fecha de nacimiento</label>
+                                <input name="birthDate" type="date" class="form-control" required>
+                                <div class="invalid-feedback">Selecciona una fecha.</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Sexo</label>
+                                <select name="sex" class="form-select" required>
+                                    <option value="" selected disabled>—</option>
+                                    <option value="1">Masculino</option>
+                                    <option value="2">Femenino</option>
+                                    <option value="3">Otro</option>
+                                </select>
+                                <div class="invalid-feedback">Selecciona una opción.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Ingresos</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">L</span>
+                                    <input name="income" type="number" class="form-control" min="0" step="0.01" value="25000" required>
+                                </div>
+                                <div class="invalid-feedback">Ingresa ingresos válidos.</div>
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-primary" type="submit">Crear</button>
+                                <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
+                                <button class="btn btn-outline-primary ms-auto" type="button" id="btnLoadCustomers">Cargar clientes</button>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped align-middle" id="customersTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Nacimiento</th>
+                                        <th>Sexo</th>
+                                        <th class="text-end">Ingresos</th>
+                                        <th>Cuentas (clic para usar)</th>
+                                        <th class="text-end">Saldo total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody><tr><td colspan="8" class="text-center muted">Sin datos</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pane-account" role="tabpanel">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Crear cuenta</h5>
+                        <form id="formAccount" class="row g-3 needs-validation" novalidate>
+                            <div class="col-md-4">
+                                <label class="form-label">ID Cliente</label>
+                                <input name="customerId" id="customerIdInput" class="form-control" required>
+                                <div class="invalid-feedback">Primero crea o ingresa un cliente.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Saldo inicial</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">L</span>
+                                    <input name="initialBalance" type="number" class="form-control" min="0" step="0.01" value="500" required>
+                                </div>
+                                <div class="invalid-feedback">Saldo inválido.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tasa interés (0–1)</label>
+                                <input name="interestRate" type="number" class="form-control" min="0" max="1" step="0.001" value="0.01">
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-primary" type="submit">Crear cuenta</button>
+                                <button class="btn btn-outline-secondary" type="button" id="goOps">Ir a Operaciones</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pane-ops" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Datos de cuenta</h5>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Número de cuenta</label>
+                                        <input id="accInput" class="form-control" placeholder="Pega/ingresa el número de cuenta">
+                                    </div>
+                                    <div class="col-md-3 d-grid">
+                                        <button class="btn btn-outline-secondary" id="btnBalance">Consultar saldo</button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-text">Se actualizará el resumen inferior.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="fw-bold">Depósito</h6>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">L</span>
+                                    <input id="depAmount" type="number" min="0.01" step="0.01" class="form-control" value="100">
+                                    <button class="btn btn-success" id="btnDeposit">Depositar</button>
+                                </div>
+                                <hr>
+                                <h6 class="fw-bold">Retiro</h6>
+                                <div class="input-group">
+                                    <span class="input-group-text">L</span>
+                                    <input id="witAmount" type="number" min="0.01" step="0.01" class="form-control" value="50">
+                                    <button class="btn btn-warning" id="btnWithdraw">Retirar</button>
+                                </div>
+                                <div class="form-text mt-2">Si no hay fondos suficientes, el retiro se rechazará.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold mb-0">Historial</h6>
+                                    <button class="btn btn-outline-primary btn-sm" id="btnTxs">Actualizar</button>
+                                </div>
+                                <div class="table-responsive mt-2">
+                                    <table class="table table-sm table-striped align-middle" id="txTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Tipo</th>
+                                                <th class="text-end">Monto (L)</th>
+                                                <th class="text-end">Saldo después (L)</th>
+                                                <th>Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody><tr><td colspan="5" class="text-center muted">Sin datos</td></tr></tbody>
+                                    </table>
+                                </div>
+                                <div class="small muted">Saldo final: <span id="finalBalance">—</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-body">
+                <h6 class="fw-bold">Respuesta técnica</h6>
+                <pre id="resultBox" class="mb-0 mono muted">Aquí se muestran respuestas de la API…</pre>
+            </div>
+        </div>
+    </main>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:11">
+        <div id="toast" class="toast text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-body" id="toastMsg">Listo</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const toast = new bootstrap.Toast(document.getElementById('toast'));
+        const toastMsg = document.getElementById('toastMsg');
+        const showToast = (msg) => { toastMsg.textContent = msg; toast.show(); };
+        const resultBox = document.getElementById('resultBox');
+        const show = (obj) => resultBox.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+        const fmt = new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' });
+        const setBadge = (el, active) => { el.classList.toggle('bg-primary', active); el.classList.toggle('bg-secondary', !active); };
+        const baseUrl = `${location.origin}/api`;
+        let state = { customerId: null, accountNumber: null, balance: null };
+
+        const setState = (partial) => {
+            state = { ...state, ...partial };
+            document.getElementById('customerIdView').textContent = state.customerId ?? '—';
+            document.getElementById('accountNumberView').textContent = state.accountNumber ?? '—';
+            document.getElementById('balanceView').textContent = state.balance != null ? fmt.format(state.balance) : '—';
+            if (state.customerId) {
+                document.getElementById('customerIdInput').value = state.customerId;
+                setBadge(document.getElementById('step1'), true);
+                setBadge(document.getElementById('step2'), true);
+            }
+            if (state.accountNumber) {
+                document.getElementById('accInput').value = state.accountNumber;
+                setBadge(document.getElementById('step3'), true);
+            }
+        };
+
+        (() => {
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        showToast('Revisa los campos en rojo');
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+
+        document.getElementById('formCustomer').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const f = e.target;
+            if (!f.checkValidity()) return;
+            const payload = Object.fromEntries(new FormData(f).entries());
+            payload.income = Number(payload.income);
+            payload.sex = Number(payload.sex);
+            const res = await fetch(`${baseUrl}/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const json = await res.json(); show(json);
+            if (res.ok && json.id) {
+                setState({ customerId: json.id });
+                showToast('Cliente creado');
+                new bootstrap.Tab(document.querySelector('#tab-account')).show();
+            } else {
+                showToast('No se pudo crear el cliente');
+            }
+        });
+
+        document.getElementById('formAccount').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const f = e.target;
+            if (!f.checkValidity()) return;
+            const payload = Object.fromEntries(new FormData(f).entries());
+            payload.customerId = Number(payload.customerId);
+            payload.initialBalance = Number(payload.initialBalance);
+            payload.interestRate = Number(payload.interestRate || 0);
+            const res = await fetch(`${baseUrl}/accounts`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const json = await res.json(); show(json);
+            if (res.ok && json.accountNumber) {
+                setState({ accountNumber: json.accountNumber, balance: json.balance ?? 0 });
+                showToast('Cuenta creada');
+                new bootstrap.Tab(document.querySelector('#tab-ops')).show();
+            } else {
+                showToast(typeof json === 'string' ? json : 'No se pudo crear la cuenta');
+            }
+        });
+
+        document.getElementById('goOps').addEventListener('click', () => {
+            new bootstrap.Tab(document.querySelector('#tab-ops')).show();
+        });
+
+        const getBalance = async (acc) => {
+            const r = await fetch(`${baseUrl}/accounts/${encodeURIComponent(acc)}/balance`);
+            const j = await r.json(); show(j);
+            if (r.ok) setState({ balance: j.balance });
+            return { ok: r.ok, data: j };
+        };
+
+        const postAmount = async (acc, endpoint, amount) => {
+            const r = await fetch(`${baseUrl}/accounts/${encodeURIComponent(acc)}/${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: Number(amount) }) });
+            const j = await r.json(); show(j);
+            return { ok: r.ok, data: j };
+        };
+
+        const renderTxs = (list) => {
+            const tbody = document.querySelector('#txTable tbody');
+            tbody.innerHTML = '';
+            if (!Array.isArray(list) || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">Sin datos</td></tr>';
+                document.getElementById('finalBalance').textContent = '—';
+                return;
+            }
+            list.forEach((t, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${idx + 1}</td><td>${({ 1: 'Depósito', 2: 'Retiro', 3: 'Interés' })[t.type] ?? t.type}</td><td class="text-end">${fmt.format(t.amount)}</td><td class="text-end">${fmt.format(t.balanceAfter)}</td><td>${new Date(t.timestamp).toLocaleString()}</td>`;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('finalBalance').textContent = fmt.format(list[list.length - 1].balanceAfter);
+        };
+
+        document.getElementById('btnBalance').addEventListener('click', async () => {
+            const acc = document.getElementById('accInput').value.trim();
+            if (!acc) return showToast('Ingresa el número de cuenta');
+            const { ok } = await getBalance(acc);
+            showToast(ok ? 'Saldo actualizado' : 'Error');
+        });
+
+        document.getElementById('btnDeposit').addEventListener('click', async () => {
+            const acc = document.getElementById('accInput').value.trim();
+            const amt = document.getElementById('depAmount').value;
+            if (!acc) return showToast('Ingresa el número de cuenta');
+            const { ok } = await postAmount(acc, 'deposit', amt);
+            if (ok) { await getBalance(acc); showToast('Depósito realizado'); } else { showToast('Error de depósito'); }
+        });
+
+        document.getElementById('btnWithdraw').addEventListener('click', async () => {
+            const acc = document.getElementById('accInput').value.trim();
+            const amt = document.getElementById('witAmount').value;
+            if (!acc) return showToast('Ingresa el número de cuenta');
+            const { ok } = await postAmount(acc, 'withdraw', amt);
+            if (ok) { await getBalance(acc); showToast('Retiro realizado'); } else { showToast('Retiro rechazado'); }
+        });
+
+        document.getElementById('btnTxs').addEventListener('click', async () => {
+            const acc = document.getElementById('accInput').value.trim();
+            if (!acc) return showToast('Ingresa el número de cuenta');
+            const r = await fetch(`${baseUrl}/accounts/${encodeURIComponent(acc)}/transactions`);
+            const j = await r.json(); show(j);
+            if (r.ok) { renderTxs(j); showToast('Historial actualizado'); } else { showToast('Error'); }
+        });
+
+        const renderCustomers = (list) => {
+            const tbody = document.querySelector('#customersTable tbody');
+            tbody.innerHTML = '';
+            if (!Array.isArray(list) || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center muted">Sin datos</td></tr>';
+                return;
+            }
+            list.forEach(c => {
+                const tr = document.createElement('tr');
+                const sexMap = { 1: 'Masculino', 2: 'Femenino', 3: 'Otro' };
+
+                const cuentasHtml = (c.accounts ?? []).map(a =>
+                    `<span class="chip mono" data-acc="${a.accountNumber}">${a.accountNumber}</span>`
+                ).join(' ') || '<span class="muted">—</span>';
+
+                tr.innerHTML = `
+                  <td>${c.id}</td>
+                  <td>${c.name}</td>
+                  <td>${new Date(c.birthDate).toLocaleDateString()}</td>
+                  <td>${sexMap[c.sex] ?? c.sex}</td>
+                  <td class="text-end">${fmt.format(c.income)}</td>
+                  <td>${cuentasHtml}</td>
+                  <td class="text-end">${fmt.format(c.totalBalance ?? 0)}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger" data-del="${c.id}">Eliminar</button>
+                  </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            tbody.querySelectorAll('.chip[data-acc]').forEach(chip => {
+                chip.addEventListener('click', async () => {
+                    const acc = chip.getAttribute('data-acc');
+                    setState({ accountNumber: acc });
+                    new bootstrap.Tab(document.querySelector('#tab-ops')).show();
+                    await getBalance(acc);
+                    showToast('Cuenta seleccionada');
+                });
+            });
+
+            tbody.querySelectorAll('button[data-del]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = Number(btn.getAttribute('data-del'));
+                    if (!confirm(`¿Eliminar cliente #${id}? Se eliminarán sus cuentas y transacciones.`)) return;
+                    const r = await fetch(`${baseUrl}/customers/${id}`, { method: 'DELETE' });
+                    if (r.status === 204) {
+                        showToast('Cliente eliminado');
+                        document.getElementById('btnLoadCustomers').click();
+                    } else {
+                        let j = null; try { j = await r.json(); } catch { }
+                        showToast(j?.error || 'No se pudo eliminar');
+                    }
+                });
+            });
+        };
+
+        document.getElementById('btnLoadCustomers').addEventListener('click', async () => {
+            const r = await fetch(`${baseUrl}/customers`);
+            const j = await r.json(); show(j);
+            if (Array.isArray(j)) { renderCustomers(j); showToast('Clientes cargados'); }
+            else { showToast('No fue posible cargar clientes'); }
+        });
+    </script>
+</body>
+</html>

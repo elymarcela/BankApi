@@ -1,0 +1,38 @@
+# ---- Visual Studio / .NET ----
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build / artefactos
+bin/
+obj/
+out/
+artifacts/
+[Bb]uild/
+[Ll]og/
+*.log
+
+# Publicaciones y pruebas
+publish/
+TestResults/
+*.trx
+
+# Rider / JetBrains (si usas)
+.idea/
+
+# Archivos de SO
+[Dd]esktop.ini
+Thumbs.db
+
+# SQLite (muy importante para tu proyecto)
+*.db
+*.db-shm
+*.db-wal
+
+# Config locales/secretos
+secrets.json
+
+# (No ignores Migrations/ porque sí quieres versionar tus migraciones de EF Core)
